@@ -9,7 +9,7 @@
 int BUFFER_SIZE = 1000;
 
 
-void exitError(char * additional_message){
+void exit_error(char * additional_message){
 	fprintf(stderr, additional_message);
 	fprintf(stderr, strerror(errno));
 	exit(1);
@@ -23,7 +23,7 @@ void usage(){
 int main(int argc, char *argv[]){
 
 	bool do_append = false;
-	int c;	
+	int c, ret_val;	
 	char * file_name = "";
 	char *buff = malloc(BUFFER_SIZE);
 	int bytes_read;
@@ -36,10 +36,9 @@ int main(int argc, char *argv[]){
 		if (c == 'a'){
 			do_append = true;
 		}else if (c == '?'){
-			exit(1);
+			usage();
 		}
 	}
-
 	if (do_append && (argc != 3))
 		usage();
 	if ((!do_append) && (argc != 2))
@@ -56,17 +55,22 @@ int main(int argc, char *argv[]){
 		S_IRGRP | S_IWGRP;
 
 	int fd_tee_file = open(file_name, open_flag, permission_mode);
+	if (fd_tee_file == -1){
+		exit_error("openning tee file failed");
+	}
 	
-	while(1){	
-		bytes_read = read(STDIN_FILENO, buff, BUFFER_SIZE);
+	while ((bytes_read = read(STDIN_FILENO, buff, BUFFER_SIZE)) > 0){;
 		if (bytes_read == -1){
+			exit_error("reading from stdin failed");
 		}
-		fprintf(stderr, "bytes read:%d\n", bytes_read);
-		if (bytes_read <= 0){
-			break;
+		ret_val = write(STDOUT_FILENO, buff, bytes_read);
+		if (ret_val == -1){
+			exit_error("writing to stdout failed");
 		}
-		write(STDOUT_FILENO, buff, bytes_read);
-		write(fd_tee_file, buff, bytes_read);
+		ret_val = write(fd_tee_file, buff, bytes_read);
+		if (ret_val == -1){
+			exit_error("writing to tee file failed");
+		}
 	}	
 	close(fd_tee_file);
 	return 0;
