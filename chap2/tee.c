@@ -59,10 +59,7 @@ int main(int argc, char *argv[]){
 		exit_error("openning tee file failed");
 	}
 	
-	while ((bytes_read = read(STDIN_FILENO, buff, BUFFER_SIZE)) > 0){;
-		if (bytes_read == -1){
-			exit_error("reading from stdin failed");
-		}
+	while ((bytes_read = read(STDIN_FILENO, buff, BUFFER_SIZE)) > 0){
 		ret_val = write(STDOUT_FILENO, buff, bytes_read);
 		if (ret_val == -1){
 			exit_error("writing to stdout failed");
@@ -72,6 +69,9 @@ int main(int argc, char *argv[]){
 			exit_error("writing to tee file failed");
 		}
 	}	
+	if (bytes_read == -1){
+		exit_error("reading from stdin failed");
+	}
 	close(fd_tee_file);
 	return 0;
 }
