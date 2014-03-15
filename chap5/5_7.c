@@ -52,11 +52,8 @@ int main(int argc, char *argv[]){
 	char test_out[100];
 	int fd_read = open("5_7_tmp.txt", O_RDONLY);
 	int bytes_read = my_readv(fd_read, in, 2);
-	fprintf(stderr, "bytes read:%d\n", bytes_read);
 	// works to here
-	fprintf(stderr, "ok 1\n");
 	strcpy(test_out, in[0].iov_base);
-	fprintf(stderr, "ok 2\n");
 	strcat(test_out, in[1].iov_base);
 	assert(strcmp(test_out, "hello world") == 0);
 }
